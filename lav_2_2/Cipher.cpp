@@ -1,97 +1,108 @@
-#include "Cipher.h"
-Cipher::Cipher(int key)
+#include "routeCipher.hpp"
+#include <algorithm>
+#include <string>
+routeCipher::routeCipher(const std::string& key)
 {
-    k=key;
+ columns = std::stoi(getValidKey(key));
 }
-wstring Cipher::zakodirovat(Cipher w, wstring& s)
+std::string routeCipher::encrypt(const std::string& str)
 {
-    wstring code;
-    s=getValidOpenText(s);
-    w.k=getValidKey(w.k,s);
-    int h;
-    if (s.size()%w.k!=0) {
-        h=s.size()/w.k+1;
-    } else {
-        h=s.size()/w.k;
-    }
-    wchar_t a[h][w.k];
-    int k=0;
-    for (int i=0; i<h; i++) {
-        for (int j=0; j<w.k; j++) {
-            if (k<s.size()) {
-                a[i][j]=s[k];
-                k++;
-            } else a[i][j]=' ';
-        }
-    }
-    for (int i=0; i<w.k; i++) {
-        for (int j=0; j<h; j++) {
-            code+=a[j][i];
-        }
-    }
-    return code;
+ int rows = div_up(getValidOpenText(str).size(), columns);
+ std::vector<std::vector<char>> table;
+ for (int i = 0; i < rows; i++) {
+ table.emplace_back(std::vector<char>());
+ }
+ int charCount = 0;
+ int tableSize = columns * rows;
+ for (int i = 0; i < rows; i++) {
+ for (int j = 0; j < columns; j++) {
+ // if (charCount < str.size()) {
+ table[i].push_back(str[charCount]);
+ charCount++;
+ // }
+ // else {
+ // table[i].push_back(' ');
+ // charCount++;
+ // }
+ }
+ }
+ std::string result;
+ for (int i = 0; i < rows; i++)
+ {
+ std::reverse(table[i].begin(), table[i].end());
+ for (int j = 0; j < table[i].size(); j++) {
+ result.push_back(table[i][j]);
+ }
+ }
+ result.erase(std::remove(result.begin(), result.end(), '\0'),result.end());
+ return result;
 }
-wstring Cipher::raskodirovar(Cipher w, wstring& s)
+std::string routeCipher::decrypt(const std::string& str)
 {
-    s=getValidOpenText(s);
-    w=getValidKey(w.k,s);
-    int h;
-    if (s.size()%w.k!=0) {
-        h=s.size()/w.k+1;
-    } else {
-        h=s.size()/w.k;
-    }
-    wchar_t a[h][w.k];
-    int k=0;
-    for (int i=0; i<w.k; i++) {
-        for (int j=0; j<h; j++) {
-            a[j][i]=s[k];
-            k++;
-        }
-    }
-    wstring decode;
-    for (int i=0; i<h; i++) {
-        for (int j=0; j<w.k; j++) {
-            decode+=a[i][j];
-        }
-    }
-    return decode;
+ int rows = div_up(getValidCipherText(str).size(), columns);
+ std::vector<std::vector<char>> table;
+ for (int i = 0; i < rows; i++) {
+ table.emplace_back(std::vector<char>());
+ }
+ int charCount = 0;
+ int tableSize = columns * rows;
+ for (int i = 0; i < rows; i++) {
+ for (int j = 0; j < columns; j++) {
+ // if (charCount < str.size()) {
+ table[i].push_back(str[charCount]);
+ charCount++;
+ // }
+ // else {
+ // table[i].push_back(' ');
+ // charCount++;
+ // }
+ }
+ }
+ std::string result;
+ for (int i = 0; i < rows; i++)
+ {
+ std::reverse(table[i].begin(), table[i].end());
+ for (int j = 0; j < table[i].size(); j++) {
+ result.push_back(table[i][j]);
+ }
+ }
+ result.erase(std::remove(result.begin(), result.end(), '\0'),
+result.end());
+ return result;
 }
-inline int Cipher::getValidKey(const int k, const std::wstring & s)
+int routeCipher::div_up(int x, int y)
 {
-    if (k<=0)
-        throw cipher_error("IVALID KEY");
-    else if (k>(s.size()/2))
-        throw cipher_error("THE KEY IS TOO LONG");
-    else
-        return k;
+ return (x - 1) / y + 1;
+9
 }
-inline std::wstring Cipher::getValidOpenText(const std::wstring & s)
+inline std::string routeCipher::getValidKey(const std::string& s)
 {
-    std::wstring tmp;
-    for (auto c:s) {
-        if (isalpha(c)) {
-            if (islower(c))                {
-                tmp.push_back(toupper(c));
-            } else
-                tmp.push_back(c);
-        }
-    }
-    if (tmp.empty())
-        throw cipher_error("NO TEXT");
-    return tmp;
+ if (s.empty())
+ throw cipher_error("Empty key");
+ std::string tmp(s);
+ for (auto& c:tmp) {
+ if (!((int)c > 47 && (int)c < 58) || (s == "0"))
+ throw cipher_error(std::string("Invalid key ") + s);
+ }
+ return tmp;
 }
-
-inline std::wstring Cipher::getValidCipherText(const std::wstring & s)
+inline std::string routeCipher::getValidOpenText(const std::string& s)
 {
-    std::wstring tmp;
-    for (auto c:s) {
-        if (isalpha(c)) {
-            if (islower(c)){
-                tmp.push_back(toupper(c));
-            } else
-                tmp.push_back(c);
-        }
-    }
-    return tmp;
+ std::string tmp;
+ for (auto c:s)
+ if ((int)c > 31 && (int)c < 127)
+ tmp.push_back(c);
+ if (tmp.empty())
+ throw cipher_error("Empty open text");
+ return tmp;
+}
+inline std::string routeCipher::getValidCipherText(const std::string& s)
+{
+ std::string tmp;
+ for (auto c:s)
+ if ((int)c > 31 && (int)c < 127)
+ tmp.push_back(c);
+ if (tmp.empty())
+ throw cipher_error("Empty cipher text");
+ return tmp;
 }
