@@ -1,32 +1,37 @@
 #include <iostream>
-#include <cctype>
-#include "Cipher.h"
-#include <locale>
-using namespace std;
-void check(const wstring& Text, const int & key)
-{
-    wstring s=Text;
-    try {
-        Cipher kluch(key);
-        wcout<<kluch.zakodirovat(key, s)<<endl;
-        wstring g=kluch.zakodirovat(key, s);
-        wcout<<kluch.raskodirovar(key, g)<<endl;
-    } catch (const cipher_error & e) {
-        cerr<<"Error: "<<e.what()<<endl;
-    }
-}
+#include <limits>
+#include "src/lib/routeCipher.hpp"
 int main()
 {
-    wcout<<L'-'<<endl;
-    check(L"",10);
-    wcout<<L'-'<<endl;
-    check(L"THISISARANDOMTEXT",10);
-    wcout<<L'-'<<endl;
-    check(L"THISISARANDOMTEXT",1);
-    wcout<<L'-'<<endl;
-    check(L"THISISARANDOMTEXT",0);
-    wcout<<L'-'<<endl;
-    check(L"THISISARANDOMTEXT",3);
-    wcout<<L'-'<<endl;
-    return 0;
+ std::string key;
+ std::string text;
+ unsigned op;
+ std::cout << "Key: ";
+ std::cin >> key;
+ try {
+ routeCipher cipher(key);
+ do {
+ std::cout<<"Operation (0-exit, 1-encrypt, 2-decrypt): ";
+ std::cin>>op;
+ if (op > 2) {
+ std::cout<<"Illegal operation\n";
+ } else if (op >0) {
+ std::cout<<"Text: ";
+ std::cin.ignore(std::numeric_limits<std::streamsize>::max(),
+'\n');
+ std::getline(std::cin, text);
+ if (op==1) {
+ std::cout<< "Encrypted text: " << cipher.encrypt(text)
+<<std::endl;
+10
+ } else {
+ std::cout<< "Decrypted text: " << cipher.decrypt(text)
+<<std::endl;
+ }
+ }
+ } while (op!=0);
+ } catch(cipher_error& e) {
+ std::cerr << "Error: " << e.what() << std::endl;
+ }
+ return 0;
 }
