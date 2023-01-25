@@ -1,39 +1,33 @@
 #include <iostream>
 #include <cctype>
-#include "src/lib/modAlphaCipher.hpp"
-#include "Windows.h"
+#include "modAlphaCipher.h"
+#include <locale>
+#include <codecvt>
+#include <typeinfo>
 using namespace std;
-int main(int argc, char **argv)
+void check(const wstring& Text, const wstring& key)
 {
- SetConsoleCP(1251);
- SetConsoleOutputCP(1251);
- std::string dictionary = modAlphaCipher::generateDict();
- string key;
- string text;
- unsigned op;
- cout<<"Cipher ready. Input key: ";
- cin>>key;
  try {
- modAlphaCipher cipher(key, dictionary);
- do {
- cout<<"Cipher ready. Input operation (0-exit, 1-encrypt, 2-decrypt): ";
- cin>>op;
- if (op > 2) {
- cout<<"Illegal operation\n";
- } else if (op > 0) {
- cout<<"Cipher ready. Input text: ";
- cin>>text;
- if (op == 1) {
- cout<<"Encrypted text:
-"<<cipher.encrypt(text)<<endl;
- } else {
- cout<<"Decrypted text: "<<cipher.decrypt(text)<<endl;
+ wstring cipherText;
+ wstring decryptedText;
+ modAlphaCipher cipher(key);
+ cipherText = cipher.encrypt(Text);
+ decryptedText = cipher.decrypt(cipherText);
+ wcout<<L"key="<<key<<endl;
+ wcout<<Text<<endl;
+ wcout<<cipherText<<endl;
+ wcout<<decryptedText<<endl;
+ } catch (const cipher_error & e) {
+ wcerr<<"Error: "<<e.what()<<endl;
  }
- }
- } while (op!=0);
- }
- catch(const cipher_error& e) {
- cerr << "Error: " << e.what() << endl;
- }
+}
+int main()
+{
+ locale loc("ru_RU.UTF-8");
+ locale::global(loc);
+ check(L"ОБРАБОТКАИСКЛЮЧЕНИЙ",L"КОД");
+ check(L"Обработкаисключений",L"");
+ check(L"обработкаисключений",L"код");
+ check(L"",L"код");
  return 0;
 }
