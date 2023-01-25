@@ -1,37 +1,30 @@
-#include <iostream>
-#include <limits>
-#include "src/lib/routeCipher.hpp"
-int main()
+#include "modTableCipher.h"
+#include <string>
+using namespace std;
+void check(const string& Text, const string& key)
 {
- std::string key;
- std::string text;
- unsigned op;
- std::cout << "Key: ";
- std::cin >> key;
  try {
- routeCipher cipher(key);
- do {
- std::cout<<"Operation (0-exit, 1-encrypt, 2-decrypt): ";
- std::cin>>op;
- if (op > 2) {
- std::cout<<"Illegal operation\n";
- } else if (op >0) {
- std::cout<<"Text: ";
- std::cin.ignore(std::numeric_limits<std::streamsize>::max(),
-'\n');
- std::getline(std::cin, text);
- if (op==1) {
- std::cout<< "Encrypted text: " << cipher.encrypt(text)
-<<std::endl;
-10
- } else {
- std::cout<< "Decrypted text: " << cipher.decrypt(text)
-<<std::endl;
+ string cipherText;
+ string decryptedText;
+ if (key.empty())
+ throw cipher_error("Empty key");
+ if (stoi(key) > 0) {
+ modTableCipher cipher(stoi(key));
+ cipherText = cipher.encrypt(Text);
+ decryptedText = cipher.decrypt(cipherText);
+ cout<<"key="<<key<<endl;
+ cout<<"Encrypted text: "<<cipherText<<endl;
+ cout<<"Decrypted text: "<<decryptedText<<endl;
+ } else
+ throw cipher_error(string("Invalid key ")+key);
+ } catch (const cipher_error & e) {
+ cerr<<"Error: "<<e.what()<<endl;
  }
- }
- } while (op!=0);
- } catch(cipher_error& e) {
- std::cerr << "Error: " << e.what() << std::endl;
- }
- return 0;
+ cout<<""<<endl;
+}
+int main(int argc, char **argv)
+{
+ check("error handling","0");
+ check("error handling","");
+ check("error handling","cod");
 }
