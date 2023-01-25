@@ -2,29 +2,33 @@
 #include <vector>
 #include <string>
 #include <map>
-#include <stdexcept>
+#include <codecvt>
+#include <locale>
+using namespace std;
 class modAlphaCipher
 {
- private:
- std::string numAlpha;
- std::map <char,int> alphaNum;
- std::vector <int> key;
- std::vector <int> convert(const std::string& s);
- std::string convert(const std::vector<int>& v);
- std::string getValidKey(const std::string& s);
- std::string getValidOpenText(const std::string& s);
- std::string getValidCipherText(const std::string& s);
- public:
+private:
+ wstring_convert<codecvt_utf8<wchar_t>, wchar_t> codec;
+ wstring numAlpha =L"АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ";
+ string Alpha ="ABCDEFGHIJKLMNOPQRSTUVWXYZ"; 
+ map <wchar_t,int> alphaNum; 
+ vector <int> key; 
+ vector<int> convert(const wstring& ws);
+ wstring convert(const vector<int>& v);
+ wstring getValidKey(const wstring & ws);
+ wstring getValidOpenText(const wstring & ws);
+ wstring getValidCipherText(const wstring & ws);
+public:
  modAlphaCipher()=delete;
- modAlphaCipher(const std::string& skey, const std::string&
-dictionary);
- static std::string generateDict();
- std::string encrypt(const std::string& open_text);
- std::string decrypt(const std::string& cipher_text);
+ modAlphaCipher(const wstring& wskey); 
+ wstring encrypt(const wstring& open_text); 
+ wstring decrypt(const wstring&
+cipher_text);
 };
-class cipher_error: public std::invalid_argument {
- public:
- explicit cipher_error (const std::string& what_arg):
+class cipher_error: public std::invalid_argument
+{
+public:
+ explicit cipher_error (const string& what_arg):
  std::invalid_argument(what_arg) {}
  explicit cipher_error (const char* what_arg):
  std::invalid_argument(what_arg) {}
