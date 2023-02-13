@@ -4,7 +4,6 @@ string modTableCipher::decrypt(const string& cipher_text)
 {
  string text = cipher_text;
  int length, lineQUA, position, i;
-9
  length = cipher_text.size(); 
  lineQUA = (length - 1) / key+ 1; 
  i = 0;
