@@ -11,7 +11,7 @@ wstring modAlphaCipher::encrypt(const wstring& open_text)
 {
  vector<int> work = convert(getValidOpenText(open_text));
  for(unsigned i=0; i < work.size(); i++) {
- work[i] = (work[i] + key[i % key.size()]) % alphaNum.size();
+ work[i] = (work[i] + key[i % key.size()]) % alphaNum.size()+1;
  }
  return convert(work);
 }
@@ -20,7 +20,7 @@ wstring modAlphaCipher::decrypt(const wstring& cipher_text)
  vector<int> work =
 convert(getValidCipherText(cipher_text));
  for(unsigned i=0; i < work.size(); i++) {
- work[i] = (work[i] + alphaNum.size() - key[i % key.size()]) % alphaNum.size();
+ work[i] = (work[i] + alphaNum.size() - key[i % key.size()]) % alphaNum.size()-1;
  }
  return convert(work);
 }
